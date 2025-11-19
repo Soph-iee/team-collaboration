@@ -1,17 +1,34 @@
-import 'reflect-metadata';
-import { DataSource } from 'typeorm';
-import { User } from '../entity/User';
+import { DataSource, type DataSourceOptions } from 'typeorm';
+
+import envConfig from '../config/envConfig';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  host: 'localhost',
-  port: 5432,
-  username: 'test',
-  password: 'test',
-  database: 'test',
+  host: envConfig.POSTGRES_HOST,
+  port: envConfig.POSTGRES_PORT,
+  username: envConfig.POSTGRES_USER,
+  password: envConfig.POSTGRES_PASSWORD,
+  database: envConfig.POSTGRES_DB,
   synchronize: true,
   logging: false,
-  entities: [User],
+  entities: [
+    envConfig.NODE_ENV === 'production' ? 'dist/entities/**/*.js' : 'src/entities/**/*.ts'
+  ],
   migrations: [],
   subscribers: []
 });
+
+export const testDatabaseConfig: DataSourceOptions = {
+  type: 'postgres',
+  host: 'localhost',
+  port: 2345,
+  username: 'root',
+  database: 'test',
+  // eslint-disable-next-line sonarjs/no-hardcoded-passwords
+  password: 'easypass',
+  synchronize: true,
+  dropSchema: true,
+  entities: ['src/entities/**/*.ts']
+};
+
+export const TestDataSource = new DataSource(testDatabaseConfig);

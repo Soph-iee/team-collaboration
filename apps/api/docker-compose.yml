@@ -1,0 +1,43 @@
+services:
+  api:
+    container_name: tc-api
+    restart: unless-stopped
+    build:
+      context: ../../  # Build from monorepo root
+      dockerfile: apps/api/Dockerfile
+      target: base
+    env_file:
+      - .env
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - .:/app/apps/api
+      - /app/apps/api/node_modules
+    depends_on:
+      - postgres
+    command: npm run dev
+
+  postgres:
+    container_name: tc-postgres
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - ${POSTGRES_PORT}:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+
+networks:
+  tc-network:
+    driver: bridge

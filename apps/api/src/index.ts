@@ -1,11 +1,19 @@
+import 'reflect-metadata';
 import express, { urlencoded, json } from 'express';
+import helmet from 'helmet';
 
+import envConfig from './config/envConfig';
+import { connectToDatabase } from './database';
 import routes from './routes';
 
-const PORT = process.env.PORT || 3002;
+const PORT = envConfig.PORT || 3001;
 
 const main = async () => {
   const app = express();
+
+  app.use(helmet());
+
+  await connectToDatabase();
 
   app.use(json());
   app.use(urlencoded({ extended: true }));
@@ -17,6 +25,7 @@ const main = async () => {
   app.use('/api/v1', routes);
 
   app.listen(PORT, () => {
+    // eslint-disable-next-line no-console
     console.info(`Api running on http://localhost:${PORT}`);
   });
 };
